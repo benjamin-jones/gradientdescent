@@ -2,6 +2,7 @@
 import csv
 import math
 import random
+import threading
 
 class Point:
 	def __init__(self,x,y):
@@ -11,6 +12,21 @@ class Point:
 		return self.x
 	def getY(self):
 		return self.y
+
+class walkThread(threading.Thread):
+	def __init__(self, tid, name, points, params):
+		threading.Thread.__init__(self)
+		self.tid = tid
+		self.name = name
+		self.points = points
+		self.params = params
+		self.result = []
+	def run(self):
+		self.result = computeDescent(self.points,self.params)
+	def getResult(self):
+		return self.result
+	def getName(self):
+		return self.name
 
 def computeTotalError(m,b,points):
 	totalError = 0
@@ -46,7 +62,6 @@ def computeDescent(points,params):
 
 	while abs(b_current - b) > 0.00001 and abs(m_current - m) > 0.00001:
 		b_current, m_current = stepGradient(b_current, m_current, points, learningRate)
-		print "Moving to (%f,%f)" % (m_current, b_current)
 		iterations += 1
 	return [b_current, m_current, iterations]
 		
@@ -57,6 +72,7 @@ def main():
 		raw_points = []
 		points = []
 		params = []
+		threads = []
 		with open('points.csv') as csvfile:
 			reader = csv.reader(csvfile)
 			for row in reader:
@@ -68,7 +84,21 @@ def main():
 		for x,y in zip(raw_points[0], raw_points[1]):
 				points.append(Point(x,y))
 
-		print computeDescent(points,params)
+		for i in range(0,10):
+			threads.append(walkThread(i, "Walker-"+str(i), points, params))
+		
+		print "Starting the walkers..."
+
+		for thread in threads:
+			thread.start()
+
+		for thread in threads:
+			thread.join()
+
+		for thread in threads:
+			print thread.getName() + " got ",
+			print thread.getResult() 
+
 	except IOError:
 		print "IOError with file"
 		exit(-1)
