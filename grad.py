@@ -60,10 +60,10 @@ def computeDescent(points,params):
 
 	iterations = 0
 
-	while abs(b_current - b) > 0.00001 and abs(m_current - m) > 0.00001:
+	while abs(b_current - b) > 0.00001 and abs(m_current - m) > 0.00001 and iterations < 5000:
 		b_current, m_current = stepGradient(b_current, m_current, points, learningRate)
 		iterations += 1
-	return [b_current, m_current, iterations]
+	return [m_current, b_current, iterations]
 		
 
 
